@@ -60,7 +60,7 @@ A simplified console-based clone of Airbnb written in Python. This application a
 
 2. Follow the on-screen instructions to navigate the application, browse listings, make reservations, or host your property.
 
-3. Enjoy your Airbnb clone console experience!
+3. Enjoy your Airbnb clone console experience
 
 ## Screenshots
 
