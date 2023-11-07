@@ -17,6 +17,7 @@ class BaseModel:
         attributes
         __str__(): An official string representation of the current object
     """
+
     def __init__(self):
         """Constructor"""
         self.id = str(uuid.uuid4())
@@ -39,4 +40,4 @@ class BaseModel:
 
     def __str__(self):
         """An official string representation of the current object"""
-        return (f"[{self.__class__.__name__}] ({self.id}) {self.__dict__}")
+        return f"[{self.__class__.__name__}] ({self.id}) {self.__dict__}"
