@@ -40,4 +40,4 @@ class BaseModel:
 
     def __str__(self):
         """An official string representation of the current object"""
-        return f"[{self.__class__.__name__}] ({self.id}) {self.__dict__}"
+        return f"[{self.__class__.__name__}] ({self.id}) {self.to_dict()}"
