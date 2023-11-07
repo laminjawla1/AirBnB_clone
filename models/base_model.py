@@ -18,11 +18,35 @@ class BaseModel:
         __str__(): An official string representation of the current object
     """
 
-    def __init__(self):
-        """Constructor"""
-        self.id = str(uuid.uuid4())
-        self.created_at = datetime.utcnow()
-        self.updated_at = datetime.utcnow()
+    DATE_TIME_FORMAT = r"%Y-%m-%dT%H:%M:%S.%f"
+
+    def __init__(self, *args, **kwargs):
+        """Constructor - Normally creates an instance
+                        if kwargs is not passed else
+                        it uses the key/value pair
+                        in kwargs
+        """
+
+        # If the kwargs is not None or is not empty
+        if kwargs and len(kwargs):
+            # Get the key/value from the dictionary passed
+            for key, value in kwargs.items():
+                # If key is created_at or updated_at
+                # Convert the string to a datetime
+                # object with the format specified
+                # by the DATE_TIME_FORMAT constant
+                if key in ["created_at", "updated_at"]:
+                    self.__dict__[key] = datetime.strptime(
+                                            value, self.DATE_TIME_FORMAT
+                                        )
+                elif key == "id":
+                    self.__dict__[key] = str(value)
+                else:
+                    self.__dict__[key] = value
+        else:
+            self.id = str(uuid.uuid4())
+            self.created_at = datetime.utcnow()
+            self.updated_at = datetime.utcnow()
 
     def save(self):
         """Saves an instance to the database"""
