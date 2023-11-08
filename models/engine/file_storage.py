@@ -34,7 +34,6 @@ class FileStorage:
                 objects = json.loads(f.read())
                 # For each object in objects
                 for obj in objects.values():
-                    print(f"obj => {obj}")
                     # Get the class name of the object
                     class_name = obj["__class__"]
                     # Reincarnate the class / blueprint
