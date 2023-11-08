@@ -58,6 +58,7 @@ class BaseModel:
     def to_dict(self):
         """
         Returns a key value pair of the current instance's attributes
+        and also append the __class__.__name__ attribute
         """
         dictionary = self.__dict__.copy()
         dictionary["created_at"] = dictionary["created_at"].isoformat()
