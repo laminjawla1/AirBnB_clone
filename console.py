@@ -1,3 +1,4 @@
+""" Console module """
 #!/usr/bin/env python3
 
 # Importing the necessary module
@@ -77,6 +78,54 @@ based on the class name and id
                 print(
                     "** too many arguments passed: Usage: create <model> **"
                 )
+        
+      
+    def do_destroy(self, line):
+        """Deletes an instance based on the class name and id"""
+        cls_arr = line.split()
+        if len(cls_arr) == 2 and checker(cls_arr[0], cls_arr[1]):
+            storage._FileStorage__objects.pop(f"{cls_arr[0]}.{cls_arr[1]}")
+            sotrage.save()
+
+    def do_all(self, line):
+        """Prints all string representation of all instances"""
+        all_list = []
+        for obj in storage.all().values():
+            my_model = BaseModel(**obj)
+            all_list.append(my_model.__str__())
+        print(all_list)
+
+    def do_update(self, line):
+        """Updates an instance based on the class name and id"""
+        cls_arr = line.split()
+        if len(cls_arr) >= 4:
+            if checker(cls_arr[0], cls_arr[1], cls_arr[2], cls_arr[3]):
+                my_type = type(storage._FileStorage__objects[cls_arr[2]])
+                storage._FileStorage__objects[cls_arr[2]] = my_type(cls_arr[3])
+                storage.save()
+
+
+def checker(cls_name=None, cls_id=None, cls_attr=None, cls_value=None):
+    """checker for commands"""
+    if cls_name == "":
+        print("** class name missing **")
+        return False
+    if cls_name != "BaseModel":
+        print("** class doesn't exist **")
+        return False
+    if cls_id == "":
+        print("** instance id missing **")
+        return False
+    if f"{cls_name}.{cls_id}" not in storage.all():
+        print("** no instance found **")
+        return False
+    if cls_attr == "":
+        print("** attribute name missing **")
+        return False
+    if cls_value == "":
+        print("** value missing **")
+        return False
+    return True
 
 
 def arg_parse(line):
