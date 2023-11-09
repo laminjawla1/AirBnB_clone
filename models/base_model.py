@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from models import storage
+import models
 
 
 class BaseModel:
@@ -30,30 +30,28 @@ class BaseModel:
 
         # If the kwargs is not None or is not empty
         if kwargs and len(kwargs):
-            # Get the key/value from the dictionary passed
-            for key, value in kwargs.items():
-                # If key is created_at or updated_at
-                # Convert the string to a datetime
-                # object with the format specified
-                # by the DATE_TIME_FORMAT constant
-                if key in ["created_at", "updated_at"]:
-                    self.__dict__[key] = datetime.strptime(
-                                            value, self.DATE_TIME_FORMAT
-                                        )
-                elif key == "id":
-                    self.__dict__[key] = str(value)
-                else:
-                    self.__dict__[key] = value
+            # If the id is not provided
+            if "id" not in kwargs:
+                kwargs["id"] = str(uuid.uuid4())
+            self.id = kwargs["id"]
+            if "created_at" in kwargs:
+                self.created_at = datetime.strptime(
+                                        kwargs["created_at"], self.DATE_TIME_FORMAT
+                                    )
+            if "updated_at" in kwargs:
+                self.updated_at = datetime.strptime(
+                                        kwargs["updated_at"], self.DATE_TIME_FORMAT
+                                    )
         else:
             self.id = str(uuid.uuid4())
             self.created_at = datetime.utcnow()
             self.updated_at = datetime.utcnow()
-            storage.new(self)
+            models.storage.new(self)
 
     def save(self):
         """Saves an instance to the database"""
         self.updated_at = datetime.utcnow()
-        storage.save()
+        models.storage.save()
 
     def to_dict(self):
         """
@@ -68,4 +66,4 @@ class BaseModel:
 
     def __str__(self):
         """An official string representation of the current object"""
-        return f"[{self.__class__.__name__}] ({self.id}) {self.to_dict()}"
+        return f"[{self.__class__.__name__}] ({self.id}) {self.__dict__}"
