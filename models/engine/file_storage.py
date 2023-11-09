@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from models.base_model import BaseModel
 from models.engine.custom_exceptions import (GetClassException, GetInstanceException)
 
@@ -25,11 +26,9 @@ class FileStorage:
         """Saves the dictionary <__objects> to the file <__file_path>"""
         with open(FileStorage.__file_path, "w") as f:
             f.write(
-                json.dumps(
-                    {
+                json.dumps({
                         key: value.to_dict() for key, value in self.__objects.items()
-                    }
-                )
+                    })
             )
 
     def reload(self):
@@ -57,5 +56,46 @@ class FileStorage:
         key = f"{model}.{id}"
         try:
             return FileStorage.__objects[key]
+        except KeyError:
+            raise GetInstanceException(id, model)
+    
+    def delete(self, model, id):
+        """Deletes an element by ID"""
+        if model not in FileStorage.models:
+            raise GetClassException(model)
+        
+        key = f"{model}.{id}"
+        try:
+            del FileStorage.__objects[key]
+            FileStorage.save(self)
+        except KeyError:
+            raise GetInstanceException(id, model)
+    
+    def print_all(self, model=None):
+        """Prints all elements"""
+        items = []
+        if model:
+            if model not in FileStorage.models:
+                raise GetClassException(model)
+            for key, value in FileStorage.__objects.items():
+                if key.split(".")[0] == model:
+                    items.append(value.__str__())
+            return items
+        else:
+            for key, value in FileStorage.__objects.items():
+                items.append(value.__str__())
+            return items
+    
+    def update(self, model, id, attr_name, attr_value):
+        """Updates an element by ID"""
+        if model not in FileStorage.models:
+            raise GetClassException(model)
+        
+        key = f"{model}.{id}"
+        try:
+            obj = FileStorage.__objects[key]
+            setattr(obj, attr_name, attr_value)
+            FileStorage.__objects[key] = obj
+            FileStorage.save(self)
         except KeyError:
             raise GetInstanceException(id, model)

@@ -1,15 +1,16 @@
-""" Console module """
 #!/usr/bin/env python3
+""" Console module """
 
 # Importing the necessary module
 import cmd
 from shlex import split
 from models import storage
 from models.base_model import BaseModel
-from models.engine.custom_exceptions import (GetInstanceException, GetClassException)
+from models.engine import custom_exceptions
 
 
-# Define a custom command-line interface class named HBNBCommand that inherits from cmd.Cmd
+# Define a custom command-line interface class named HBNBCommand
+# that inherits from cmd.Cmd
 class HBNBCommand(cmd.Cmd):
     """
     HBNB command line interface - This will be used as the
@@ -19,16 +20,27 @@ class HBNBCommand(cmd.Cmd):
     # Set a custom prompt for the command-line interface
     prompt = "(hbnb) "
 
+    # Error messages
+    ERROR_MESSAGES = [
+        "** class name missing **",  # 0
+        "** class doesn't exist **",  # 1
+        "** instance id missing **",  # 2
+        "** no instance found **",  # 3
+        "** attribute name missing **",  # 4
+        "** value missing **",  # 5
+    ]
+
     # Define a command to quit the program
     def do_quit(self, _):
         """Quit command to exit the program"""
         return True
-    
-    # Define a command to handle the End-of-File (EOF) input, also quitting the program
+
+    # Define a command to handle the End-of-File (EOF) input,
+    # also quitting the program
     def do_EOF(self, _):
         """Exits the program"""
         return True
-    
+
     def emptyline(self):
         """Do nothing when the user press only enter"""
         pass
@@ -40,7 +52,7 @@ class HBNBCommand(cmd.Cmd):
         args, args_len = arg_parse(line)
         match args_len:
             case 0:
-                print("** class name missing **")
+                print(HBNBCommand.ERROR_MESSAGES[0])
             case 1:
                 try:
                     cls = eval(args[0])
@@ -48,90 +60,87 @@ class HBNBCommand(cmd.Cmd):
                     print(instance.id)
                     instance.save()
                 except NameError:
-                    print("** class doesn't exist **")
+                    print(HBNBCommand.ERROR_MESSAGES[1])
             case _:
-                print(
-                    "** too many arguments passed: Usage: create <model> **"
-                )
-    
+                pass
+
     # Show command
     def do_show(self, line):
         """Prints the string representation of an instance
-based on the class name and id
+        based on the class name and id
         """
         args, args_len = arg_parse(line)
         match args_len:
             case 0:
-                print("** class name missing **")
+                print(HBNBCommand.ERROR_MESSAGES[0])
             case 1:
-                print("** instance id missing **")
+                print(HBNBCommand.ERROR_MESSAGES[2])
             case 2:
-                instance = storage.get(*args)
                 try:
+                    instance = storage.get(*args)
                     print(instance)
-                except GetClassException:
-                    print("** class doesn't exist **")
-                except GetInstanceException:
-                    print("** no instance found **")
-
+                except custom_exceptions.GetClassException:
+                    print(HBNBCommand.ERROR_MESSAGES[1])
+                except custom_exceptions.GetInstanceException:
+                    print(HBNBCommand.ERROR_MESSAGES[3])
             case _:
-                print(
-                    "** too many arguments passed: Usage: create <model> **"
-                )
-        
-      
+                pass
+
     def do_destroy(self, line):
         """Deletes an instance based on the class name and id"""
-        cls_arr = line.split()
-        if len(cls_arr) == 2 and checker(cls_arr[0], cls_arr[1]):
-            storage._FileStorage__objects.pop(f"{cls_arr[0]}.{cls_arr[1]}")
-            sotrage.save()
+        args, args_len = arg_parse(line)
+        match args_len:
+            case 0:
+                print(HBNBCommand.ERROR_MESSAGES[0])
+            case 1:
+                print(HBNBCommand.ERROR_MESSAGES[2])
+            case 2:
+                try:
+                    storage.delete(*args)
+                except custom_exceptions.GetClassException:
+                    print(HBNBCommand.ERROR_MESSAGES[3])
+                except custom_exceptions.GetInstanceException:
+                    print(HBNBCommand.ERROR_MESSAGES[4])
+            case _:
+                pass
 
     def do_all(self, line):
         """Prints all string representation of all instances"""
-        all_list = []
-        for obj in storage.all().values():
-            my_model = BaseModel(**obj)
-            all_list.append(my_model.__str__())
-        print(all_list)
+        args, args_len = arg_parse(line)
+        if args_len < 2:
+            try:
+                print(storage.print_all(*args))
+            except custom_exceptions.GetClassException:
+                print(HBNBCommand.ERROR_MESSAGES[1])
 
     def do_update(self, line):
         """Updates an instance based on the class name and id"""
-        cls_arr = line.split()
-        if len(cls_arr) >= 4:
-            if checker(cls_arr[0], cls_arr[1], cls_arr[2], cls_arr[3]):
-                my_type = type(storage._FileStorage__objects[cls_arr[2]])
-                storage._FileStorage__objects[cls_arr[2]] = my_type(cls_arr[3])
-                storage.save()
-
-
-def checker(cls_name=None, cls_id=None, cls_attr=None, cls_value=None):
-    """checker for commands"""
-    if cls_name == "":
-        print("** class name missing **")
-        return False
-    if cls_name != "BaseModel":
-        print("** class doesn't exist **")
-        return False
-    if cls_id == "":
-        print("** instance id missing **")
-        return False
-    if f"{cls_name}.{cls_id}" not in storage.all():
-        print("** no instance found **")
-        return False
-    if cls_attr == "":
-        print("** attribute name missing **")
-        return False
-    if cls_value == "":
-        print("** value missing **")
-        return False
-    return True
+        args, args_len = arg_parse(line)
+        match args_len:
+            case 0:  # update
+                print(HBNBCommand.ERROR_MESSAGES[0])
+            case 1:  # update BaseModel
+                print(HBNBCommand.ERROR_MESSAGES[2])
+            case 2:  # update BaseModel id
+                print(HBNBCommand.ERROR_MESSAGES[4])
+            case 3:  # update BaseModel id attribute_name
+                print(HBNBCommand.ERROR_MESSAGES[5])
+            case 4:  # update BaseModel id attribute_name attribute_value
+                try:
+                    storage.update(*args)
+                except custom_exceptions.GetClassException:
+                    print(HBNBCommand.ERROR_MESSAGES[1])
+                except custom_exceptions.GetInstanceException:
+                    print(HBNBCommand.ERROR_MESSAGES[3])
+            case _:
+                pass
 
 
 def arg_parse(line):
     """Splits the argument by a space"""
     tokens = split(line)
     return tokens, len(tokens)
+
 
 # Check if this script is the main entry point for execution
 if __name__ == "__main__":
