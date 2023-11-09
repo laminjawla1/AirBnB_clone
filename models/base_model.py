@@ -1,3 +1,6 @@
+"""
+BaseModel Module - The Base for all other classes
+"""
 import uuid
 from datetime import datetime
 import models

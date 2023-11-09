@@ -1,6 +1,7 @@
 import json
 from datetime import datetime
 from models.base_model import BaseModel
+from models.user import User
 from models.engine.custom_exceptions import (GetClassException, GetInstanceException)
 
 
@@ -10,7 +11,8 @@ class FileStorage:
     __file_path: str = "file.json"  # Path to the json file
     __objects: dict = {}   # Will store all objects by <class name>.id
     models = [
-        "BaseModel"
+        "BaseModel",
+        "User",
     ]
 
     def all(self):
