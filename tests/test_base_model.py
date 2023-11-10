@@ -100,6 +100,14 @@ class TestBaseModel(unittest.TestCase):
             f"[{class_name}] ({self.obj.id}) {self.obj.__dict__}",
         )
 
+    # Testing instance created from a dict
+    def test_create_instance_from_dict(self):
+        dict_items = self.obj.to_dict()
+        new_obj = BaseModel(**dict_items)
+        self.assertEqual(new_obj.id, self.obj.id)
+        self.assertEqual(new_obj.created_at, self.obj.created_at)
+        self.assertEqual(new_obj.updated_at, self.obj.updated_at)
+
 
 if __name__ == "__main__":
     unittest.main()
