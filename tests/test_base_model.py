@@ -55,10 +55,10 @@ class TestBaseModel(unittest.TestCase):
         self.assertEqual(type(self.obj.number), int)
 
     def test_typeof_base_model_instance_to_dict_equal(self):
-        self.assertEqual(type(self.obj.to_dict()), dict)
+        self.assertIsInstance(self.obj.to_dict(), dict)
 
     def test_typeof_base_model_instance_to_dict_not_equal(self):
-        self.assertNotEqual(type(self.obj.to_dict()), str)
+        self.assertNotIsInstance(self.obj.to_dict(), str)
 
     # Testing values
     def test_value_of_base_model_instance_id(self):
