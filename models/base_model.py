@@ -26,9 +26,9 @@ class BaseModel:
 
     def __init__(self, *args, **kwargs):
         """Constructor - Normally creates an instance
-                        if kwargs is not passed else
-                        it uses the key/value pair
-                        in kwargs
+        if kwargs is not passed else
+        it uses the key/value pair
+        in kwargs
         """
 
         # If the kwargs is not None or is not empty
@@ -39,12 +39,12 @@ class BaseModel:
             self.id = kwargs["id"]
             if "created_at" in kwargs:
                 self.created_at = datetime.strptime(
-                                        kwargs["created_at"], self.DATE_TIME_FORMAT
-                                    )
+                    kwargs["created_at"], self.DATE_TIME_FORMAT
+                )
             if "updated_at" in kwargs:
                 self.updated_at = datetime.strptime(
-                                        kwargs["updated_at"], self.DATE_TIME_FORMAT
-                                    )
+                    kwargs["updated_at"], self.DATE_TIME_FORMAT
+                )
         else:
             self.id = str(uuid.uuid4())
             self.created_at = datetime.utcnow()
