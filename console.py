@@ -58,19 +58,18 @@ class HBNBCommand(cmd.Cmd):
         """Create a new instance"""
 
         args, args_len = arg_parse(line)
-        match args_len:
-            case 0:
-                print(HBNBCommand.ERROR_MESSAGES[0])
-            case 1:
-                try:
-                    cls = eval(args[0])
-                    instance = cls()
-                    print(instance.id)
-                    instance.save()
-                except NameError:
-                    print(HBNBCommand.ERROR_MESSAGES[1])
-            case _:
-                pass
+        if args_len == 0:
+            print(HBNBCommand.ERROR_MESSAGES[0])
+        elif args_len == 1:
+            try:
+                cls = eval(args[0])
+                instance = cls()
+                print(instance.id)
+                instance.save()
+            except NameError:
+                print(HBNBCommand.ERROR_MESSAGES[1])
+        else:
+            pass
 
     # Show command
     def do_show(self, line):
@@ -78,39 +77,37 @@ class HBNBCommand(cmd.Cmd):
         based on the class name and id
         """
         args, args_len = arg_parse(line)
-        match args_len:
-            case 0:
-                print(HBNBCommand.ERROR_MESSAGES[0])
-            case 1:
-                print(HBNBCommand.ERROR_MESSAGES[2])
-            case 2:
-                try:
-                    instance = storage.get(*args)
-                    print(instance)
-                except custom_exceptions.GetClassException:
-                    print(HBNBCommand.ERROR_MESSAGES[1])
-                except custom_exceptions.GetInstanceException:
-                    print(HBNBCommand.ERROR_MESSAGES[3])
-            case _:
-                pass
+        if args_len == 0:
+            print(HBNBCommand.ERROR_MESSAGES[0])
+        elif args_len == 1:
+            print(HBNBCommand.ERROR_MESSAGES[2])
+        elif args_len == 2:
+            try:
+                instance = storage.get(*args)
+                print(instance)
+            except custom_exceptions.GetClassException:
+                print(HBNBCommand.ERROR_MESSAGES[1])
+            except custom_exceptions.GetInstanceException:
+                print(HBNBCommand.ERROR_MESSAGES[3])
+        else:
+            pass
 
     def do_destroy(self, line):
         """Deletes an instance based on the class name and id"""
         args, args_len = arg_parse(line)
-        match args_len:
-            case 0:
-                print(HBNBCommand.ERROR_MESSAGES[0])
-            case 1:
-                print(HBNBCommand.ERROR_MESSAGES[2])
-            case 2:
-                try:
-                    storage.delete(*args)
-                except custom_exceptions.GetClassException:
-                    print(HBNBCommand.ERROR_MESSAGES[3])
-                except custom_exceptions.GetInstanceException:
-                    print(HBNBCommand.ERROR_MESSAGES[4])
-            case _:
-                pass
+        if args_len == 0:
+            print(HBNBCommand.ERROR_MESSAGES[0])
+        elif args_len == 1:
+            print(HBNBCommand.ERROR_MESSAGES[2])
+        elif args_len == 2:
+            try:
+                storage.delete(*args)
+            except custom_exceptions.GetClassException:
+                print(HBNBCommand.ERROR_MESSAGES[3])
+            except custom_exceptions.GetInstanceException:
+                print(HBNBCommand.ERROR_MESSAGES[4])
+        else:
+            pass
 
     def do_all(self, line):
         """Prints all string representation of all instances"""
@@ -133,24 +130,23 @@ class HBNBCommand(cmd.Cmd):
     def do_update(self, line):
         """Updates an instance based on the class name and id"""
         args, args_len = arg_parse(line)
-        match args_len:
-            case 0:  # update
-                print(HBNBCommand.ERROR_MESSAGES[0])
-            case 1:  # update BaseModel
-                print(HBNBCommand.ERROR_MESSAGES[2])
-            case 2:  # update BaseModel id
-                print(HBNBCommand.ERROR_MESSAGES[4])
-            case 3:  # update BaseModel id attribute_name
-                print(HBNBCommand.ERROR_MESSAGES[5])
-            case 4:  # update BaseModel id attribute_name attribute_value
-                try:
-                    storage.update(*args)
-                except custom_exceptions.GetClassException:
-                    print(HBNBCommand.ERROR_MESSAGES[1])
-                except custom_exceptions.GetInstanceException:
-                    print(HBNBCommand.ERROR_MESSAGES[3])
-            case _:
-                pass
+        if args_len == 0:  # update
+            print(HBNBCommand.ERROR_MESSAGES[0])
+        elif args_len == 1:  # update BaseModel
+            print(HBNBCommand.ERROR_MESSAGES[2])
+        elif args_len == 2:  # update BaseModel id
+            print(HBNBCommand.ERROR_MESSAGES[4])
+        elif args_len == 3:  # update BaseModel id attribute_name
+            print(HBNBCommand.ERROR_MESSAGES[5])
+        elif args_len == 4:  # update M id attribute_name attribute_value
+            try:
+                storage.update(*args)
+            except custom_exceptions.GetClassException:
+                print(HBNBCommand.ERROR_MESSAGES[1])
+            except custom_exceptions.GetInstanceException:
+                print(HBNBCommand.ERROR_MESSAGES[3])
+        else:
+            pass
 
     def precmd(self, line):
         """Before the command is executed"""
@@ -190,10 +186,9 @@ def parse_final_cmd(line):
     except (IndexError, ValueError):
         pass
 
-    match line[1]:
-        case "all" | "count" | "create":
+        if line[1] in ["all", "count", "create"]:
             line = f"{line[1]} {line[0]}"
-        case "update":
+        elif line[1] == "update":
             line = f"{line[1]} {line[0]} {line[2]} {line[3]} {line[4]}"
     return "".join(line)
 
