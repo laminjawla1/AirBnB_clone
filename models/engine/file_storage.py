@@ -24,23 +24,20 @@ class FileStorage:
         "Review",
     ]
 
-    def __init__(self):
-        """Constructor"""
-        ...
-
     def all(self):
         """Returns the dictionary <__objects>"""
         return FileStorage.__objects
 
     def new(self, obj):
         """Sets in <__objects> the obj with key <obj class name>.id"""
-        key = f"{obj.__class__.__name__}.{obj.id}"
+        class_name = obj.__class__.__name__
+        key = "{}.{}".format(class_name, obj.id)
         FileStorage.__objects[key] = obj
 
     def save(self):
         """Saves the dictionary <__objects> to the file <__file_path>"""
         with open(FileStorage.__file_path, "w") as f:
-            obj = {k: v.to_dict() for k, v in self.__objects.items()}
+            obj = {k: v.to_dict() for k, v in FileStorage.__objects.items()}
             f.write(json.dumps(obj))
 
     def reload(self):
