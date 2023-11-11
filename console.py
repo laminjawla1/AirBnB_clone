@@ -62,11 +62,12 @@ class HBNBCommand(cmd.Cmd):
             print(HBNBCommand.ERROR_MESSAGES[0])
         elif args_len == 1:
             try:
+                print(args[0])
                 cls = eval(args[0])
                 instance = cls()
                 print(instance.id)
-                storage.save()
-            except NameError:
+                instance.save()
+            except Exception as e:
                 print(HBNBCommand.ERROR_MESSAGES[1])
         else:
             pass
