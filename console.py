@@ -228,5 +228,4 @@ def replace_all(s, pattern, value):
 
 # Check if this script is the main entry point for execution
 if __name__ == "__main__":
-    # Create an instance of the HBNBCommand class and start the command loop
     HBNBCommand().cmdloop()
