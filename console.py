@@ -170,7 +170,7 @@ def parse_final_cmd(line):
         if "show" in line[1] or "destroy" in line[1]:
             command = line[1].split("(")
             command[1] = command[1].replace(")", "")
-            line = f"{command[0]} {line[0]} {command[1]}"
+            line = "{} {} {}".format(command[0], line[0], command[1])
         elif "update" in line[1]:
             line[1] = line[1].split("(")
             line = [line[0], line[1][0], line[1][1]]
@@ -187,10 +187,12 @@ def parse_final_cmd(line):
     except (IndexError, ValueError):
         pass
 
-        if line[1] in ["all", "count", "create"]:
-            line = f"{line[1]} {line[0]}"
-        elif line[1] == "update":
-            line = f"{line[1]} {line[0]} {line[2]} {line[3]} {line[4]}"
+    if line[1] in ["all", "count", "create"]:
+        line = "{} {}".format(line[1], line[0])
+    elif line[1] == "update":
+        line = "{} {} {} {} {}".format(
+            line[1], line[0], line[2], line[3], line[4]
+        )
     return "".join(line)
 
 
