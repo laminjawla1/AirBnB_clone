@@ -16,75 +16,6 @@ from models.base_model import BaseModel
 from models.engine import custom_exceptions
 
 
-def parse_final_cmd(line):
-    """
-    Parsed the final command
-    if in the form
-    <class name>.cmd() ...
-    """
-    # Remove unnecessary characters
-    line = replace_all(line, "\"'", "")
-    line = line.split(".")
-    try:
-        if "show" in line[1] or "destroy" in line[1]:
-            command = line[1].split("(")
-            command[1] = command[1].replace(")", "")
-            line = f"{command[0]} {line[0]} {command[1]}"
-        elif "update" in line[1]:
-            line[1] = line[1].split("(")
-            line = [line[0], line[1][0], line[1][1]]
-            line[2] = line[2].split(",")
-            line = [
-                line[0],
-                line[1],
-                line[2][0],
-                line[2][1].strip(),
-                replace_all(line[2][2], ")", "").strip(),
-            ]
-        else:
-            line[1] = replace_all(line[1], "()", "")
-    except (IndexError, ValueError):
-        pass
-
-    match line[1]:
-        case "all" | "count" | "create":
-            line = f"{line[1]} {line[0]}"
-        case "update":
-            line = f"{line[1]} {line[0]} {line[2]} {line[3]} {line[4]}"
-    return "".join(line)
-
-
-def arg_parse(line):
-    """Splits the argument by a space"""
-    tokens = split(line)
-    return tokens, len(tokens)
-
-
-def replace_all(s, pattern, value):
-    """
-    Replace all occurrences of characters in the pattern
-    with the specified value in the given string.
-
-    Parameters:
-    - s (str): The input string.
-    - pattern (str): The set of characters to be replaced.
-    - value (str): The value to replace the matching characters with.
-
-    Returns:
-    - str: The modified string.
-    """
-    # Using a dictionary to map each character in pattern
-    # to the replacement value
-    replacement_dict = {char: value for char in pattern}
-
-    # Using str.translate to replace characters
-    translation_table = str.maketrans(replacement_dict)
-
-    # Applying the translation and returning the result
-    result = s.translate(translation_table)
-    return result
-
-
 # Define a custom command-line interface class named HBNBCommand
 # that inherits from cmd.Cmd
 class HBNBCommand(cmd.Cmd):
@@ -227,6 +158,75 @@ class HBNBCommand(cmd.Cmd):
         if "." in line and line.endswith(")"):
             line = parse_final_cmd(line)
         return cmd.Cmd.precmd(self, line)
+
+
+def parse_final_cmd(line):
+    """
+    Parsed the final command
+    if in the form
+    <class name>.cmd() ...
+    """
+    # Remove unnecessary characters
+    line = replace_all(line, "\"'", "")
+    line = line.split(".")
+    try:
+        if "show" in line[1] or "destroy" in line[1]:
+            command = line[1].split("(")
+            command[1] = command[1].replace(")", "")
+            line = f"{command[0]} {line[0]} {command[1]}"
+        elif "update" in line[1]:
+            line[1] = line[1].split("(")
+            line = [line[0], line[1][0], line[1][1]]
+            line[2] = line[2].split(",")
+            line = [
+                line[0],
+                line[1],
+                line[2][0],
+                line[2][1].strip(),
+                replace_all(line[2][2], ")", "").strip(),
+            ]
+        else:
+            line[1] = replace_all(line[1], "()", "")
+    except (IndexError, ValueError):
+        pass
+
+    match line[1]:
+        case "all" | "count" | "create":
+            line = f"{line[1]} {line[0]}"
+        case "update":
+            line = f"{line[1]} {line[0]} {line[2]} {line[3]} {line[4]}"
+    return "".join(line)
+
+
+def arg_parse(line):
+    """Splits the argument by a space"""
+    tokens = split(line)
+    return tokens, len(tokens)
+
+
+def replace_all(s, pattern, value):
+    """
+    Replace all occurrences of characters in the pattern
+    with the specified value in the given string.
+
+    Parameters:
+    - s (str): The input string.
+    - pattern (str): The set of characters to be replaced.
+    - value (str): The value to replace the matching characters with.
+
+    Returns:
+    - str: The modified string.
+    """
+    # Using a dictionary to map each character in pattern
+    # to the replacement value
+    replacement_dict = {char: value for char in pattern}
+
+    # Using str.translate to replace characters
+    translation_table = str.maketrans(replacement_dict)
+
+    # Applying the translation and returning the result
+    result = s.translate(translation_table)
+    return result
 
 
 if __name__ == "__main__":
