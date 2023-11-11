@@ -65,7 +65,7 @@ class HBNBCommand(cmd.Cmd):
                 cls = eval(args[0])
                 instance = cls()
                 print(instance.id)
-                instance.save()
+                storage.save()
             except NameError:
                 print(HBNBCommand.ERROR_MESSAGES[1])
         else:
