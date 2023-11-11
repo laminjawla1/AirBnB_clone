@@ -24,7 +24,6 @@ class TestPlace(unittest.TestCase):
         self.amenity_2 = Amenity()
         self.amenity_3 = Amenity()
 
-
         self.obj.city_id: str = self.city.id
         self.obj.user_id: str = self.user.id
         self.obj.name: str = "African Princes"

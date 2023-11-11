@@ -2,6 +2,7 @@
 """ Console module """
 
 # Importing the necessary module
+import re
 import cmd
 from shlex import split
 from models import storage
@@ -117,6 +118,15 @@ class HBNBCommand(cmd.Cmd):
             except custom_exceptions.GetClassException:
                 print(HBNBCommand.ERROR_MESSAGES[1])
 
+    def do_count(self, line):
+        """Counts all objects in a given class"""
+        args, args_len = arg_parse(line)
+        if args_len < 2:
+            try:
+                print(storage.count(*args))
+            except custom_exceptions.GetClassException:
+                print(HBNBCommand.ERROR_MESSAGES[1])
+
     def do_update(self, line):
         """Updates an instance based on the class name and id"""
         args, args_len = arg_parse(line)
@@ -138,6 +148,39 @@ class HBNBCommand(cmd.Cmd):
                     print(HBNBCommand.ERROR_MESSAGES[3])
             case _:
                 pass
+
+    def precmd(self, line):
+        """Before the command is executed"""
+        if "." in line and line.endswith(")"):
+            line = parse_final_cmd(line)
+        return cmd.Cmd.precmd(self, line)
+
+
+def parse_final_cmd(line):
+    """
+    Parsed the final command
+    if in the form
+    <class name>.cmd() ...
+    """
+    # Remove unnecessary characters
+    line = line.replace('"', "")
+    line = line.replace("'", "")
+    line = line.split(".")
+    try:
+        if "show" in line[1] or "destroy" in line[1]:
+            command = line[1].split("(")
+            command[1] = command[1].replace(")", "")
+            line = f"{command[0]} {line[0]} {command[1]}"
+        else:
+            line[1] = line[1].replace("(", "")
+            line[1] = line[1].replace(")", "")
+    except (IndexError, ValueError):
+        pass
+
+    match line[1]:
+        case "all" | "count" | "create":
+            line = f"{line[1]} {line[0]}"
+    return "".join(line)
 
 
 def arg_parse(line):

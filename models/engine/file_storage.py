@@ -23,6 +23,7 @@ class FileStorage:
         "Place",
         "Review",
     ]
+
     def __init__(self):
         """Constructor"""
         ...
@@ -39,7 +40,8 @@ class FileStorage:
     def save(self):
         """Saves the dictionary <__objects> to the file <__file_path>"""
         with open(FileStorage.__file_path, "w") as f:
-            f.write(json.dumps({k: v.to_dict() for k, v in self.__objects.items()}))
+            obj = {k: v.to_dict() for k, v in self.__objects.items()}
+            f.write(json.dumps(obj))
 
     def reload(self):
         """Loads the dictionary <__objects> from the file <__file_path>"""
@@ -51,7 +53,7 @@ class FileStorage:
                 objects = json.loads(f.read())
 
                 FileStorage.__objects = {
-                    key: eval(obj["__class__"])(**obj) for key, obj in objects.items()
+                    k: eval(o["__class__"])(**o) for k, o in objects.items()
                 }
         except Exception as e:  # Unable to open the file
             pass
@@ -93,6 +95,21 @@ class FileStorage:
             for key, value in FileStorage.__objects.items():
                 items.append(value.__str__())
             return items
+
+    def count(self, model=None):
+        """Prints all elements"""
+        cnt = 0
+        if model:
+            if model not in FileStorage.models:
+                raise custom_exceptions.GetClassException(model)
+            for key, value in FileStorage.__objects.items():
+                if key.split(".")[0] == model:
+                    cnt += 1
+            return cnt
+        else:
+            for key, value in FileStorage.__objects.items():
+                cnt += 1
+            return cnt
 
     def update(self, model, id, attr_name, attr_value):
         """Updates an element by ID"""
