@@ -151,6 +151,7 @@ class HBNBCommand(cmd.Cmd):
 
     def precmd(self, line):
         """Before the command is executed"""
+        line = line.strip()
         if "." in line and line.endswith(")"):
             line = parse_final_cmd(line)
         return cmd.Cmd.precmd(self, line)
@@ -170,6 +171,17 @@ def parse_final_cmd(line):
             command = line[1].split("(")
             command[1] = command[1].replace(")", "")
             line = f"{command[0]} {line[0]} {command[1]}"
+        elif "update" in line[1]:
+            line[1] = line[1].split("(")
+            line = [line[0], line[1][0], line[1][1]]
+            line[2] = line[2].split(",")
+            line = [
+                line[0],
+                line[1],
+                line[2][0],
+                line[2][1].strip(),
+                replace_all(line[2][2], ")", "").strip(),
+            ]
         else:
             line[1] = replace_all(line[1], "()", "")
     except (IndexError, ValueError):
@@ -178,6 +190,8 @@ def parse_final_cmd(line):
     match line[1]:
         case "all" | "count" | "create":
             line = f"{line[1]} {line[0]}"
+        case "update":
+            line = f"{line[1]} {line[0]} {line[2]} {line[3]} {line[4]}"
     return "".join(line)
 
 
