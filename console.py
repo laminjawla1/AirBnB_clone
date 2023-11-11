@@ -1,8 +1,7 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 """ Console module """
 
 # Importing the necessary module
-import re
 import cmd
 from shlex import split
 from models import storage
@@ -36,14 +35,15 @@ class HBNBCommand(cmd.Cmd):
     ]
 
     # Define a command to quit the program
-    def do_quit(self, _):
+    def do_quit(self, arg):
         """Quit command to exit the program"""
         return True
 
     # Define a command to handle the End-of-File (EOF) input,
     # also quitting the program
-    def do_EOF(self, _):
+    def do_EOF(self, arg):
         """Exits the program"""
+        print()
         return True
 
     def emptyline(self):
