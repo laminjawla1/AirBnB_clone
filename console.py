@@ -163,8 +163,7 @@ def parse_final_cmd(line):
     <class name>.cmd() ...
     """
     # Remove unnecessary characters
-    line = line.replace('"', "")
-    line = line.replace("'", "")
+    line = replace_all(line, "\"'", "")
     line = line.split(".")
     try:
         if "show" in line[1] or "destroy" in line[1]:
@@ -172,8 +171,7 @@ def parse_final_cmd(line):
             command[1] = command[1].replace(")", "")
             line = f"{command[0]} {line[0]} {command[1]}"
         else:
-            line[1] = line[1].replace("(", "")
-            line[1] = line[1].replace(")", "")
+            line[1] = replace_all(line[1], "()", "")
     except (IndexError, ValueError):
         pass
 
@@ -187,6 +185,31 @@ def arg_parse(line):
     """Splits the argument by a space"""
     tokens = split(line)
     return tokens, len(tokens)
+
+
+def replace_all(s, pattern, value):
+    """
+    Replace all occurrences of characters in the pattern
+    with the specified value in the given string.
+
+    Parameters:
+    - s (str): The input string.
+    - pattern (str): The set of characters to be replaced.
+    - value (str): The value to replace the matching characters with.
+
+    Returns:
+    - str: The modified string.
+    """
+    # Using a dictionary to map each character in pattern
+    # to the replacement value
+    replacement_dict = {char: value for char in pattern}
+
+    # Using str.translate to replace characters
+    translation_table = str.maketrans(replacement_dict)
+
+    # Applying the translation and returning the result
+    result = s.translate(translation_table)
+    return result
 
 
 # Check if this script is the main entry point for execution
