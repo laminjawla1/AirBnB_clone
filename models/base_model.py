@@ -2,8 +2,8 @@
 BaseModel Module - The Base for all other classes
 """
 import uuid
-from datetime import datetime
 import models
+from datetime import datetime
 
 
 class BaseModel:
@@ -31,28 +31,26 @@ class BaseModel:
         in kwargs
         """
 
+        self.id = str(uuid.uuid4())
+        self.created_at = datetime.utcnow()
+        self.updated_at = datetime.utcnow()
         # If the kwargs is not None or is not empty
         if kwargs and len(kwargs):
             # If the id is not provided
-            if "id" not in kwargs:
-                kwargs["id"] = str(uuid.uuid4())
-            self.id = kwargs["id"]
-            if "created_at" in kwargs:
-                self.created_at = datetime.strptime(
-                    kwargs["created_at"], self.DATE_TIME_FORMAT
-                )
-            if "updated_at" in kwargs:
-                self.updated_at = datetime.strptime(
-                    kwargs["updated_at"], self.DATE_TIME_FORMAT
-                )
+            for key, value in kwargs.items():
+                if key in ["created_at", "updated_at"]:
+                    F = self.DATE_TIME_FORMAT
+                    self.__dict__[key] = datetime.strptime(value, F)
+                else:
+                    self.__dict__[key] = value
         else:
-            self.id = str(uuid.uuid4())
-            self.created_at = datetime.utcnow()
-            self.updated_at = datetime.utcnow()
             models.storage.new(self)
 
     def save(self):
-        """Saves an instance to the database"""
+        """
+        Saves an instance to the database
+        and update the updated_at time
+        """
         self.updated_at = datetime.utcnow()
         models.storage.save()
 
@@ -62,8 +60,8 @@ class BaseModel:
         and also append the __class__.__name__ attribute
         """
         dictionary = self.__dict__.copy()
-        dictionary["created_at"] = dictionary["created_at"].isoformat()
-        dictionary["updated_at"] = dictionary["updated_at"].isoformat()
+        dictionary["created_at"] = self.created_at.isoformat()
+        dictionary["updated_at"] = self.updated_at.isoformat()
         dictionary["__class__"] = self.__class__.__name__
         return dictionary
 
