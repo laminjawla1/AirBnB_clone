@@ -1,209 +1,232 @@
 #!/usr/bin/python3
-"""Defines the HBnB console."""
+"""
+Console module - Implements a
+command-line interface
+"""
+
+# Importing the necessary module
 import cmd
-import re
 from shlex import split
 from models import storage
-from models.base_model import BaseModel
 from models.user import User
 from models.state import State
-from models.city import City
 from models.place import Place
 from models.amenity import Amenity
-from models.review import Review
+from models.base_model import BaseModel
+from models.engine import custom_exceptions
 
 
-def parse(arg):
-    curly_braces = re.search(r"\{(.*?)\}", arg)
-    brackets = re.search(r"\[(.*?)\]", arg)
-    if curly_braces is None:
-        if brackets is None:
-            return [i.strip(",") for i in split(arg)]
-        else:
-            lexer = split(arg[:brackets.span()[0]])
-            retl = [i.strip(",") for i in lexer]
-            retl.append(brackets.group())
-            return retl
-    else:
-        lexer = split(arg[:curly_braces.span()[0]])
-        retl = [i.strip(",") for i in lexer]
-        retl.append(curly_braces.group())
-        return retl
-
-
-class HBNBCommand(cmd.Cmd):
-    """Defines the HolbertonBnB command interpreter.
-
-    Attributes:
-        prompt (str): The command prompt.
+def parse_final_cmd(line):
     """
-
-    prompt = "(hbnb) "
-    __classes = {
-        "BaseModel",
-        "User",
-        "State",
-        "City",
-        "Place",
-        "Amenity",
-        "Review"
-    }
-
-    def emptyline(self):
-        """Do nothing upon receiving an empty line."""
+    Parsed the final command
+    if in the form
+    <class name>.cmd() ...
+    """
+    # Remove unnecessary characters
+    line = replace_all(line, "\"'", "")
+    line = line.split(".")
+    try:
+        if "show" in line[1] or "destroy" in line[1]:
+            command = line[1].split("(")
+            command[1] = command[1].replace(")", "")
+            line = f"{command[0]} {line[0]} {command[1]}"
+        elif "update" in line[1]:
+            line[1] = line[1].split("(")
+            line = [line[0], line[1][0], line[1][1]]
+            line[2] = line[2].split(",")
+            line = [
+                line[0],
+                line[1],
+                line[2][0],
+                line[2][1].strip(),
+                replace_all(line[2][2], ")", "").strip(),
+            ]
+        else:
+            line[1] = replace_all(line[1], "()", "")
+    except (IndexError, ValueError):
         pass
 
-    def default(self, arg):
-        """Default behavior for cmd module when input is invalid"""
-        argdict = {
-            "all": self.do_all,
-            "show": self.do_show,
-            "destroy": self.do_destroy,
-            "count": self.do_count,
-            "update": self.do_update
-        }
-        match = re.search(r"\.", arg)
-        if match is not None:
-            argl = [arg[:match.span()[0]], arg[match.span()[1]:]]
-            match = re.search(r"\((.*?)\)", argl[1])
-            if match is not None:
-                command = [argl[1][:match.span()[0]], match.group()[1:-1]]
-                if command[0] in argdict.keys():
-                    call = "{} {}".format(argl[0], command[1])
-                    return argdict[command[0]](call)
-        print("*** Unknown syntax: {}".format(arg))
-        return False
+    match line[1]:
+        case "all" | "count" | "create":
+            line = f"{line[1]} {line[0]}"
+        case "update":
+            line = f"{line[1]} {line[0]} {line[2]} {line[3]} {line[4]}"
+    return "".join(line)
 
+
+def arg_parse(line):
+    """Splits the argument by a space"""
+    tokens = split(line)
+    return tokens, len(tokens)
+
+
+def replace_all(s, pattern, value):
+    """
+    Replace all occurrences of characters in the pattern
+    with the specified value in the given string.
+
+    Parameters:
+    - s (str): The input string.
+    - pattern (str): The set of characters to be replaced.
+    - value (str): The value to replace the matching characters with.
+
+    Returns:
+    - str: The modified string.
+    """
+    # Using a dictionary to map each character in pattern
+    # to the replacement value
+    replacement_dict = {char: value for char in pattern}
+
+    # Using str.translate to replace characters
+    translation_table = str.maketrans(replacement_dict)
+
+    # Applying the translation and returning the result
+    result = s.translate(translation_table)
+    return result
+
+
+# Define a custom command-line interface class named HBNBCommand
+# that inherits from cmd.Cmd
+class HBNBCommand(cmd.Cmd):
+    """
+    HBNB command line interface - This will be used as the
+    frontend of the project where users can interact with the program
+    """
+
+    # Set a custom prompt for the command-line interface
+    prompt = "(hbnb) "
+
+    # Error messages
+    ERROR_MESSAGES = [
+        "** class name missing **",  # 0
+        "** class doesn't exist **",  # 1
+        "** instance id missing **",  # 2
+        "** no instance found **",  # 3
+        "** attribute name missing **",  # 4
+        "** value missing **",  # 5
+    ]
+
+    # Define a command to quit the program
     def do_quit(self, arg):
-        """Quit command to exit the program."""
+        """Quit command to exit the program"""
         return True
 
+    # Define a command to handle the End-of-File (EOF) input,
+    # also quitting the program
     def do_EOF(self, arg):
-        """EOF signal to exit the program."""
-        print("")
+        """Exits the program"""
+        print()
         return True
 
-    def do_create(self, arg):
-        """Usage: create <class>
-        Create a new class instance and print its id.
+    def emptyline(self):
+        """Do nothing when the user press only enter"""
+        pass
+
+    # Create Command
+    def do_create(self, line):
+        """Create a new instance"""
+
+        args, args_len = arg_parse(line)
+        match args_len:
+            case 0:
+                print(HBNBCommand.ERROR_MESSAGES[0])
+            case 1:
+                try:
+                    cls = eval(args[0])
+                    instance = cls()
+                    print(instance.id)
+                    instance.save()
+                except NameError:
+                    print(HBNBCommand.ERROR_MESSAGES[1])
+            case _:
+                pass
+
+    # Show command
+    def do_show(self, line):
+        """Prints the string representation of an instance
+        based on the class name and id
         """
-        argl = parse(arg)
-        if len(argl) == 0:
-            print("** class name missing **")
-        elif argl[0] not in HBNBCommand.__classes:
-            print("** class doesn't exist **")
-        else:
-            print(eval(argl[0])().id)
-            storage.save()
+        args, args_len = arg_parse(line)
+        match args_len:
+            case 0:
+                print(HBNBCommand.ERROR_MESSAGES[0])
+            case 1:
+                print(HBNBCommand.ERROR_MESSAGES[2])
+            case 2:
+                try:
+                    instance = storage.get(*args)
+                    print(instance)
+                except custom_exceptions.GetClassException:
+                    print(HBNBCommand.ERROR_MESSAGES[1])
+                except custom_exceptions.GetInstanceException:
+                    print(HBNBCommand.ERROR_MESSAGES[3])
+            case _:
+                pass
 
-    def do_show(self, arg):
-        """Usage: show <class> <id> or <class>.show(<id>)
-        Display the string representation of a class instance of a given id.
-        """
-        argl = parse(arg)
-        objdict = storage.all()
-        if len(argl) == 0:
-            print("** class name missing **")
-        elif argl[0] not in HBNBCommand.__classes:
-            print("** class doesn't exist **")
-        elif len(argl) == 1:
-            print("** instance id missing **")
-        elif "{}.{}".format(argl[0], argl[1]) not in objdict:
-            print("** no instance found **")
-        else:
-            print(objdict["{}.{}".format(argl[0], argl[1])])
+    def do_destroy(self, line):
+        """Deletes an instance based on the class name and id"""
+        args, args_len = arg_parse(line)
+        match args_len:
+            case 0:
+                print(HBNBCommand.ERROR_MESSAGES[0])
+            case 1:
+                print(HBNBCommand.ERROR_MESSAGES[2])
+            case 2:
+                try:
+                    storage.delete(*args)
+                except custom_exceptions.GetClassException:
+                    print(HBNBCommand.ERROR_MESSAGES[3])
+                except custom_exceptions.GetInstanceException:
+                    print(HBNBCommand.ERROR_MESSAGES[4])
+            case _:
+                pass
 
-    def do_destroy(self, arg):
-        """Usage: destroy <class> <id> or <class>.destroy(<id>)
-        Delete a class instance of a given id."""
-        argl = parse(arg)
-        objdict = storage.all()
-        if len(argl) == 0:
-            print("** class name missing **")
-        elif argl[0] not in HBNBCommand.__classes:
-            print("** class doesn't exist **")
-        elif len(argl) == 1:
-            print("** instance id missing **")
-        elif "{}.{}".format(argl[0], argl[1]) not in objdict.keys():
-            print("** no instance found **")
-        else:
-            del objdict["{}.{}".format(argl[0], argl[1])]
-            storage.save()
-
-    def do_all(self, arg):
-        """Usage: all or all <class> or <class>.all()
-        Display string representations of all instances of a given class.
-        If no class is specified, displays all instantiated objects."""
-        argl = parse(arg)
-        if len(argl) > 0 and argl[0] not in HBNBCommand.__classes:
-            print("** class doesn't exist **")
-        else:
-            objl = []
-            for obj in storage.all().values():
-                if len(argl) > 0 and argl[0] == obj.__class__.__name__:
-                    objl.append(obj.__str__())
-                elif len(argl) == 0:
-                    objl.append(obj.__str__())
-            print(objl)
-
-    def do_count(self, arg):
-        """Usage: count <class> or <class>.count()
-        Retrieve the number of instances of a given class."""
-        argl = parse(arg)
-        count = 0
-        for obj in storage.all().values():
-            if argl[0] == obj.__class__.__name__:
-                count += 1
-        print(count)
-
-    def do_update(self, arg):
-        """Usage: update <class> <id> <attribute_name> <attribute_value> or
-       <class>.update(<id>, <attribute_name>, <attribute_value>) or
-       <class>.update(<id>, <dictionary>)
-        Update a class instance of a given id by adding or updating
-        a given attribute key/value pair or dictionary."""
-        argl = parse(arg)
-        objdict = storage.all()
-
-        if len(argl) == 0:
-            print("** class name missing **")
-            return False
-        if argl[0] not in HBNBCommand.__classes:
-            print("** class doesn't exist **")
-            return False
-        if len(argl) == 1:
-            print("** instance id missing **")
-            return False
-        if "{}.{}".format(argl[0], argl[1]) not in objdict.keys():
-            print("** no instance found **")
-            return False
-        if len(argl) == 2:
-            print("** attribute name missing **")
-            return False
-        if len(argl) == 3:
+    def do_all(self, line):
+        """Prints all string representation of all instances"""
+        args, args_len = arg_parse(line)
+        if args_len < 2:
             try:
-                type(eval(argl[2])) != dict
-            except NameError:
-                print("** value missing **")
-                return False
+                print(storage.print_all(*args))
+            except custom_exceptions.GetClassException:
+                print(HBNBCommand.ERROR_MESSAGES[1])
 
-        if len(argl) == 4:
-            obj = objdict["{}.{}".format(argl[0], argl[1])]
-            if argl[2] in obj.__class__.__dict__.keys():
-                valtype = type(obj.__class__.__dict__[argl[2]])
-                obj.__dict__[argl[2]] = valtype(argl[3])
-            else:
-                obj.__dict__[argl[2]] = argl[3]
-        elif type(eval(argl[2])) == dict:
-            obj = objdict["{}.{}".format(argl[0], argl[1])]
-            for k, v in eval(argl[2]).items():
-                if (k in obj.__class__.__dict__.keys() and
-                        type(obj.__class__.__dict__[k]) in {str, int, float}):
-                    valtype = type(obj.__class__.__dict__[k])
-                    obj.__dict__[k] = valtype(v)
-                else:
-                    obj.__dict__[k] = v
-        storage.save()
+    def do_count(self, line):
+        """Counts all objects in a given class"""
+        args, args_len = arg_parse(line)
+        if args_len < 2:
+            try:
+                print(storage.count(*args))
+            except custom_exceptions.GetClassException:
+                print(HBNBCommand.ERROR_MESSAGES[1])
+
+    def do_update(self, line):
+        """Updates an instance based on the class name and id"""
+        args, args_len = arg_parse(line)
+        match args_len:
+            case 0:  # update
+                print(HBNBCommand.ERROR_MESSAGES[0])
+            case 1:  # update BaseModel
+                print(HBNBCommand.ERROR_MESSAGES[2])
+            case 2:  # update BaseModel id
+                print(HBNBCommand.ERROR_MESSAGES[4])
+            case 3:  # update BaseModel id attribute_name
+                print(HBNBCommand.ERROR_MESSAGES[5])
+            case 4:  # update BaseModel id attribute_name attribute_value
+                try:
+                    storage.update(*args)
+                except custom_exceptions.GetClassException:
+                    print(HBNBCommand.ERROR_MESSAGES[1])
+                except custom_exceptions.GetInstanceException:
+                    print(HBNBCommand.ERROR_MESSAGES[3])
+            case _:
+                pass
+
+    def precmd(self, line):
+        """Before the command is executed"""
+        line = line.strip()
+        if "." in line and line.endswith(")"):
+            line = parse_final_cmd(line)
+        return cmd.Cmd.precmd(self, line)
 
 
 if __name__ == "__main__":
