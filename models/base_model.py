@@ -22,8 +22,6 @@ class BaseModel:
         __str__(): An official string representation of the current object
     """
 
-    DATE_TIME_FORMAT = r"%Y-%m-%dT%H:%M:%S.%f"
-
     def __init__(self, *args, **kwargs):
         """Constructor - Normally creates an instance
         if kwargs is not passed else
@@ -31,6 +29,7 @@ class BaseModel:
         in kwargs
         """
 
+        DATE_TIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%f"
         self.id = str(uuid.uuid4())
         self.created_at = datetime.utcnow()
         self.updated_at = datetime.utcnow()
@@ -39,7 +38,7 @@ class BaseModel:
             # If the id is not provided
             for key, value in kwargs.items():
                 if key in ["created_at", "updated_at"]:
-                    F = self.DATE_TIME_FORMAT
+                    F = DATE_TIME_FORMAT
                     self.__dict__[key] = datetime.strptime(value, F)
                 else:
                     self.__dict__[key] = value
