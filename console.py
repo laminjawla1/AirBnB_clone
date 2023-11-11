@@ -104,9 +104,9 @@ class HBNBCommand(cmd.Cmd):
             try:
                 storage.delete(*args)
             except custom_exceptions.GetClassException:
-                print(HBNBCommand.ERROR_MESSAGES[3])
+                print(HBNBCommand.ERROR_MESSAGES[1])
             except custom_exceptions.GetInstanceException:
-                print(HBNBCommand.ERROR_MESSAGES[4])
+                print(HBNBCommand.ERROR_MESSAGES[3])
         else:
             pass
 
