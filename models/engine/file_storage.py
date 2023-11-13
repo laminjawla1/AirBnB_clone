@@ -52,12 +52,12 @@ class FileStorage:
         try:
             with open(FileStorage.__file_path, "r") as f:
                 # Get all the objects from the file <__file_path>
-                objects = json.loads(f.read())
+                objects = json.load(f.read())
 
                 FileStorage.__objects = {
                     k: eval(o["__class__"])(**o) for k, o in objects.items()
                 }
-        except Exception as e:  # Unable to open the file
+        except FileNotFoundError:  # Unable to open the file
             pass
 
     def get(self, model, id):
@@ -65,7 +65,7 @@ class FileStorage:
         if model not in FileStorage.models:
             raise custom_exceptions.GetClassException(model)
 
-        key = f"{model}.{id}"
+        key = "{}.{}".format(model, id)
         try:
             return FileStorage.__objects[key]
         except KeyError:
@@ -76,7 +76,7 @@ class FileStorage:
         if model not in FileStorage.models:
             raise custom_exceptions.GetClassException(model)
 
-        key = f"{model}.{id}"
+        key = "{}.{}".format(model, id)
         try:
             del FileStorage.__objects[key]
             FileStorage.save(self)
@@ -118,7 +118,7 @@ class FileStorage:
         if model not in FileStorage.models:
             raise custom_exceptions.GetClassException(model)
 
-        key = f"{model}.{id}"
+        key = "{}.{}".format(model, id)
         try:
             obj = FileStorage.__objects[key]
             setattr(obj, attr_name, attr_value)
