@@ -1,3 +1,7 @@
+"""
+This module implements and an abstract form of
+saving objects
+"""
 import json
 from models.user import User
 from models.city import City
