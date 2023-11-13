@@ -52,7 +52,7 @@ class FileStorage:
         try:
             with open(FileStorage.__file_path, "r") as f:
                 # Get all the objects from the file <__file_path>
-                objects = json.load(f.read())
+                objects = json.load(f)
 
                 FileStorage.__objects = {
                     k: eval(o["__class__"])(**o) for k, o in objects.items()
