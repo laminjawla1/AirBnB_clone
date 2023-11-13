@@ -41,9 +41,9 @@ class FileStorage:
 
     def save(self):
         """Saves the dictionary <__objects> to the file <__file_path>"""
+        obj = {k: v.to_dict() for k, v in FileStorage.__objects.items()}
         with open(FileStorage.__file_path, "w") as f:
-            obj = {k: v.to_dict() for k, v in FileStorage.__objects.items()}
-            f.write(json.dumps(obj))
+            json.dump(obj, f)
 
     def reload(self):
         """Loads the dictionary <__objects> from the file <__file_path>"""
