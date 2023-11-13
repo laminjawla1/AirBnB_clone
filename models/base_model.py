@@ -38,6 +38,8 @@ class BaseModel:
         if kwargs and len(kwargs):
             # If the id is not provided
             for key, value in kwargs.items():
+                if key == "__class__":
+                    continue
                 if key in ["created_at", "updated_at"]:
                     F = self.DATE_TIME_FORMAT
                     self.__dict__[key] = datetime.strptime(value, F)
