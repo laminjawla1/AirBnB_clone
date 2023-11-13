@@ -191,8 +191,7 @@ def parse_final_cmd(line):
         line = "{} {}".format(line[1], line[0])
     elif line[1] == "update":
         line = "{} {} {} {} {}".format(
-            line[1], line[0], line[2], line[3], line[4]
-        )
+            line[1], line[0], line[2], line[3], line[4])
     return "".join(line)
 
 
