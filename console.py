@@ -6,6 +6,7 @@ command-line interface
 
 # Importing the necessary module
 import cmd
+import json
 from shlex import split
 from models import storage
 from models.user import User
@@ -130,6 +131,10 @@ class HBNBCommand(cmd.Cmd):
 
     def do_update(self, line):
         """Updates an instance based on the class name and id"""
+        if isinstance(line, list):
+            print("It's a list of commands")
+            print(line)
+            return
         args, args_len = arg_parse(line)
         if args_len == 0:  # update
             print(HBNBCommand.ERROR_MESSAGES[0])
@@ -164,7 +169,7 @@ def parse_final_cmd(line):
     <class name>.cmd() ...
     """
     # Remove unnecessary characters
-    line = replace_all(line, "\"'", "")
+    # line = replace_all(line, "\"'", "")
     line = line.split(".")
     try:
         if "show" in line[1] or "destroy" in line[1]:
@@ -174,6 +179,8 @@ def parse_final_cmd(line):
         elif "update" in line[1]:
             line[1] = line[1].split("(")
             line = [line[0], line[1][0], line[1][1]]
+            if line[2].split(",", 1)[1].strip().startswith("{"):
+                return handle_dict_of_attr(line)
             line[2] = line[2].split(",")
             line = [
                 line[0],
@@ -187,12 +194,53 @@ def parse_final_cmd(line):
     except (IndexError, ValueError):
         pass
 
-    if line[1] in ["all", "count", "create"]:
-        line = "{} {}".format(line[1], line[0])
-    elif line[1] == "update":
-        line = "{} {} {} {} {}".format(
-            line[1], line[0], line[2], line[3], line[4])
+    try:
+        if line[1] in ["all", "count", "create"]:
+            line = "{} {}".format(line[1], line[0])
+        elif line[1] == "update":
+            line = "{} {} {} {} {}".format(
+                line[1], line[0], line[2], line[3], line[4])
+    except Exception as e:
+        pass
     return "".join(line)
+
+
+def handle_dict_of_attr(line):
+    _class = line[0]
+    command = line[1]
+    _id = line[2].split(",", 1)[0]
+    args = line[2].split(",", 1)[1].replace(")", "")
+    args = args.replace("'", '"')
+    args = json.loads(args)
+    commands = []
+    for key, value in args.items():
+        commands.append(
+            "{} {} {} {} {}".format(
+                command, _class, replace_all(_id, '"', ""), key, value
+            )
+        )
+    for cmd in commands[:-1]:
+        args, args_len = arg_parse(cmd)
+        del args[0]
+        args_len -= 1
+        if args_len == 0:  # update
+            print(HBNBCommand.ERROR_MESSAGES[0])
+        elif args_len == 1:  # update BaseModel
+            print(HBNBCommand.ERROR_MESSAGES[2])
+        elif args_len == 2:  # update BaseModel id
+            print(HBNBCommand.ERROR_MESSAGES[4])
+        elif args_len == 3:  # update BaseModel id attribute_name
+            print(HBNBCommand.ERROR_MESSAGES[5])
+        elif args_len == 4:  # update M id attribute_name attribute_value
+            try:
+                storage.update(*args)
+            except custom_exceptions.GetClassException:
+                print(HBNBCommand.ERROR_MESSAGES[1])
+            except custom_exceptions.GetInstanceException:
+                print(HBNBCommand.ERROR_MESSAGES[3])
+        else:
+            pass
+    return commands[-1]
 
 
 def arg_parse(line):
