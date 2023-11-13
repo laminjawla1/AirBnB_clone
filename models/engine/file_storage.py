@@ -17,8 +17,8 @@ from models.engine import custom_exceptions
 class FileStorage:
     """Class for managing file storage and retrieval"""
 
-    __file_path: str = "file.json"  # Path to the json file
-    __objects: dict = {}  # Will store all objects by <class name>.id
+    __file_path = "file.json"
+    __objects = {}  # Will store all objects by <class name>.id
     models = [
         "BaseModel",
         "User",
