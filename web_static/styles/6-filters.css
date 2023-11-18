@@ -6,6 +6,7 @@
     border: 1px solid #DDDDDD;
     border-radius: 4px;
     text-align: right;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 button {
     font-size: 18px;
@@ -30,6 +31,7 @@ button:hover {
 .locations{
     order: 0;
     border-right: 1px solid #DDDDDD;
+    position: relative;
 }
 .amenities {
     order: 1;
@@ -43,4 +45,35 @@ button:hover {
     font-weight: 400;
     font-size: 14px;
     margin: 0 auto;
+}
+.popover {
+    display: none;
+    margin-top: 1.26rem;
+    background-color: #FAFAFA;
+    width: 292px;
+    border: 1px solid #DDDDDD;
+    border-radius: 4px;
+    margin-left: -41px;
+    box-sizing: border-box;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+.popover > ul > li {
+    list-style: none;
+}
+.locations > div.popover > ul {
+    padding-left: 20px;
+}
+.locations > div.popover > ul {
+    margin-top: -10px;
+}
+.locations:hover .popover {
+    display: block;
+    padding-left: 18px;
+}
+.amenities:hover .popover{
+    display: block;
+    padding-top: 10px;
+}
+.popover > h2 {
+    font-size: 16px;
 }
