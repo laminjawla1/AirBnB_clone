@@ -64,7 +64,6 @@ A simplified console-based clone of Airbnb written in Python. This application a
 
 ## Screenshots
 
-Include some screenshots or GIFs of your application in action to provide a visual overview of its features and interface.
 
 ## Contributing
 
